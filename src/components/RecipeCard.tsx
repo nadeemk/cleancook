@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef } from 'react';
-import html2pdf from 'html2pdf.js';
 import Image from 'next/image';
 
 interface RecipeData {
@@ -25,6 +24,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     if (!cardRef.current) return;
 
     try {
+      const html2pdf = (await import('html2pdf.js')).default;
       const opt = {
         margin: 1,
         filename: `${recipe.title.toLowerCase().replace(/\s+/g, '-')}.pdf`,

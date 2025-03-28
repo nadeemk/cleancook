@@ -5,36 +5,25 @@ import RecipeCard from '@/components/RecipeCard';
 
 export default function RecipePage() {
   const searchParams = useSearchParams();
-  const recipeData = searchParams.get('data');
+  const data = searchParams.get('data');
+  const recipe = data ? JSON.parse(decodeURIComponent(data)) : null;
 
-  if (!recipeData) {
+  if (!recipe) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-center text-red-600">
-            No recipe data found. Please try again.
-          </h1>
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">No Recipe Data</h1>
+            <p className="mt-2 text-gray-600">Please go back and try again.</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  try {
-    const recipe = JSON.parse(decodeURIComponent(recipeData));
-    return (
-      <main className="min-h-screen bg-gray-50 py-12">
-        <RecipeCard recipe={recipe} />
-      </main>
-    );
-  } catch {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-center text-red-600">
-            Invalid recipe data. Please try again.
-          </h1>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <RecipeCard recipe={recipe} />
+    </div>
+  );
 } 
