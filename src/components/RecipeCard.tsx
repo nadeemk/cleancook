@@ -33,7 +33,8 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           scale: 2,
           useCORS: true,
           logging: true,
-          allowTaint: true
+          allowTaint: true,
+          backgroundColor: '#ffffff'
         },
         jsPDF: { 
           unit: 'in', 
@@ -42,7 +43,28 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         }
       };
 
-      await html2pdf().set(opt).from(cardRef.current).save();
+      // Create a temporary div with standard RGB colors
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = cardRef.current.innerHTML;
+      
+      // Replace Tailwind classes with standard RGB colors
+      const elements = tempDiv.getElementsByTagName('*');
+      for (const element of elements) {
+        const htmlElement = element as HTMLElement;
+        if (htmlElement.classList.contains('text-gray-900')) {
+          htmlElement.style.color = '#111827';
+        } else if (htmlElement.classList.contains('text-gray-800')) {
+          htmlElement.style.color = '#1F2937';
+        } else if (htmlElement.classList.contains('text-gray-600')) {
+          htmlElement.style.color = '#4B5563';
+        } else if (htmlElement.classList.contains('bg-green-600')) {
+          htmlElement.style.backgroundColor = '#059669';
+        } else if (htmlElement.classList.contains('hover:bg-green-700')) {
+          htmlElement.style.backgroundColor = '#047857';
+        }
+      }
+
+      await html2pdf().set(opt).from(tempDiv).save();
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
