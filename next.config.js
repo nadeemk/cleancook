@@ -11,7 +11,6 @@ const nextConfig = {
   // Production optimizations
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   // Security headers
   async headers() {
     return [

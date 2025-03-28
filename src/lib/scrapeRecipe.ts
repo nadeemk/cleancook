@@ -10,6 +10,28 @@ interface RecipeData {
   image?: string[];
 }
 
+interface JsonLdRecipe {
+  '@type': 'Recipe';
+  name: string;
+  recipeYield: string | string[];
+  prepTime: string;
+  cookTime: string;
+  recipeIngredient: string | string[];
+  recipeInstructions: unknown;
+  image?: string | string[];
+}
+
+interface JsonLdGraphItem {
+  '@type': string;
+  name?: string;
+  recipeYield?: string | string[];
+  prepTime?: string;
+  cookTime?: string;
+  recipeIngredient?: string | string[];
+  recipeInstructions?: unknown;
+  image?: string | string[];
+}
+
 function formatDuration(duration: string): string {
   if (!duration) return '';
   
@@ -27,17 +49,20 @@ function formatDuration(duration: string): string {
   return `${minutes} min`;
 }
 
-function extractInstructions(instructions: any): string[] {
+function extractInstructions(instructions: unknown): string[] {
   if (Array.isArray(instructions)) {
     return instructions.flatMap(instruction => {
       if (typeof instruction === 'string') {
         return instruction;
       }
-      if (instruction['@type'] === 'HowToSection') {
-        return instruction.itemListElement.map((step: any) => step.text || step.name);
-      }
-      if (instruction['@type'] === 'HowToStep') {
-        return instruction.text || instruction.name;
+      if (typeof instruction === 'object' && instruction !== null && '@type' in instruction) {
+        const typedInstruction = instruction as { '@type': string; itemListElement?: Array<{ text?: string; name?: string }>; text?: string; name?: string };
+        if (typedInstruction['@type'] === 'HowToSection') {
+          return typedInstruction.itemListElement?.map(step => step.text || step.name || '') || [];
+        }
+        if (typedInstruction['@type'] === 'HowToStep') {
+          return typedInstruction.text || typedInstruction.name || '';
+        }
       }
       return '';
     }).filter(Boolean);
@@ -66,14 +91,14 @@ export async function scrapeRecipe(url: string): Promise<RecipeData> {
         
         // Handle @graph structure
         if (data['@graph']) {
-          const recipe = data['@graph'].find((item: any) => item['@type'] === 'Recipe');
+          const recipe = data['@graph'].find((item: JsonLdGraphItem) => item['@type'] === 'Recipe');
           if (recipe) {
             console.log('Found recipe in @graph:', recipe);
             return {
               title: recipe.name || '',
               servings: Array.isArray(recipe.recipeYield) ? recipe.recipeYield.join(', ') : recipe.recipeYield || '',
-              prepTime: formatDuration(recipe.prepTime),
-              cookTime: formatDuration(recipe.cookTime),
+              prepTime: formatDuration(recipe.prepTime || ''),
+              cookTime: formatDuration(recipe.cookTime || ''),
               ingredients: Array.isArray(recipe.recipeIngredient) 
                 ? recipe.recipeIngredient 
                 : [recipe.recipeIngredient || ''],
@@ -85,14 +110,14 @@ export async function scrapeRecipe(url: string): Promise<RecipeData> {
         
         // Handle array of items
         if (Array.isArray(data)) {
-          const recipe = data.find(item => item['@type'] === 'Recipe');
+          const recipe = data.find((item: JsonLdGraphItem) => item['@type'] === 'Recipe');
           if (recipe) {
             console.log('Found recipe in array:', recipe);
             return {
               title: recipe.name || '',
               servings: Array.isArray(recipe.recipeYield) ? recipe.recipeYield.join(', ') : recipe.recipeYield || '',
-              prepTime: formatDuration(recipe.prepTime),
-              cookTime: formatDuration(recipe.cookTime),
+              prepTime: formatDuration(recipe.prepTime || ''),
+              cookTime: formatDuration(recipe.cookTime || ''),
               ingredients: Array.isArray(recipe.recipeIngredient) 
                 ? recipe.recipeIngredient 
                 : [recipe.recipeIngredient || ''],
@@ -103,17 +128,18 @@ export async function scrapeRecipe(url: string): Promise<RecipeData> {
         } 
         // Handle single recipe
         else if (data['@type'] === 'Recipe') {
-          console.log('Found single recipe:', data);
+          const recipe = data as JsonLdRecipe;
+          console.log('Found single recipe:', recipe);
           return {
-            title: data.name || '',
-            servings: Array.isArray(data.recipeYield) ? data.recipeYield.join(', ') : data.recipeYield || '',
-            prepTime: formatDuration(data.prepTime),
-            cookTime: formatDuration(data.cookTime),
-            ingredients: Array.isArray(data.recipeIngredient)
-              ? data.recipeIngredient
-              : [data.recipeIngredient || ''],
-            instructions: extractInstructions(data.recipeInstructions),
-            image: Array.isArray(data.image) ? data.image : data.image ? [data.image] : undefined
+            title: recipe.name || '',
+            servings: Array.isArray(recipe.recipeYield) ? recipe.recipeYield.join(', ') : recipe.recipeYield || '',
+            prepTime: formatDuration(recipe.prepTime),
+            cookTime: formatDuration(recipe.cookTime),
+            ingredients: Array.isArray(recipe.recipeIngredient)
+              ? recipe.recipeIngredient
+              : [recipe.recipeIngredient || ''],
+            instructions: extractInstructions(recipe.recipeInstructions),
+            image: Array.isArray(recipe.image) ? recipe.image : recipe.image ? [recipe.image] : undefined
           };
         }
       } catch (e) {

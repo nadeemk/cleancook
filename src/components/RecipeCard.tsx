@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import html2pdf from 'html2pdf.js';
 import Image from 'next/image';
 
