@@ -51,16 +51,63 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       const elements = tempDiv.getElementsByTagName('*');
       for (const element of elements) {
         const htmlElement = element as HTMLElement;
-        if (htmlElement.classList.contains('text-gray-900')) {
+        
+        // Remove all Tailwind classes
+        const classes = Array.from(htmlElement.classList);
+        classes.forEach(className => {
+          if (className.startsWith('text-') || className.startsWith('bg-')) {
+            htmlElement.classList.remove(className);
+          }
+        });
+
+        // Add standard colors based on original classes
+        if (classes.includes('text-gray-900')) {
           htmlElement.style.color = '#111827';
-        } else if (htmlElement.classList.contains('text-gray-800')) {
+        } else if (classes.includes('text-gray-800')) {
           htmlElement.style.color = '#1F2937';
-        } else if (htmlElement.classList.contains('text-gray-600')) {
+        } else if (classes.includes('text-gray-600')) {
           htmlElement.style.color = '#4B5563';
-        } else if (htmlElement.classList.contains('bg-green-600')) {
+        } else if (classes.includes('text-white')) {
+          htmlElement.style.color = '#ffffff';
+        }
+
+        if (classes.includes('bg-white')) {
+          htmlElement.style.backgroundColor = '#ffffff';
+        } else if (classes.includes('bg-green-600')) {
           htmlElement.style.backgroundColor = '#059669';
-        } else if (htmlElement.classList.contains('hover:bg-green-700')) {
+        } else if (classes.includes('hover:bg-green-700')) {
           htmlElement.style.backgroundColor = '#047857';
+        }
+
+        // Add base styles
+        if (htmlElement.tagName === 'H1') {
+          htmlElement.style.fontSize = '1.875rem';
+          htmlElement.style.fontWeight = '700';
+          htmlElement.style.marginBottom = '1.5rem';
+          htmlElement.style.textAlign = 'center';
+        } else if (htmlElement.tagName === 'H2') {
+          htmlElement.style.fontSize = '1.25rem';
+          htmlElement.style.fontWeight = '700';
+          htmlElement.style.marginBottom = '1rem';
+        } else if (htmlElement.tagName === 'H3') {
+          htmlElement.style.fontWeight = '600';
+        }
+
+        // Add list styles
+        if (htmlElement.tagName === 'UL') {
+          htmlElement.style.listStyleType = 'disc';
+          htmlElement.style.paddingLeft = '1.5rem';
+        } else if (htmlElement.tagName === 'OL') {
+          htmlElement.style.listStyleType = 'decimal';
+          htmlElement.style.paddingLeft = '1.5rem';
+        }
+
+        // Add button styles
+        if (htmlElement.tagName === 'BUTTON') {
+          htmlElement.style.width = '100%';
+          htmlElement.style.padding = '0.5rem 1rem';
+          htmlElement.style.borderRadius = '0.375rem';
+          htmlElement.style.marginTop = '1.5rem';
         }
       }
 
