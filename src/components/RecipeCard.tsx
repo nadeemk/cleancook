@@ -122,14 +122,12 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     <div className="max-w-4xl mx-auto p-6">
       <div ref={cardRef} className="bg-white rounded-lg shadow-lg p-8 print:shadow-none">
         {recipe.image && recipe.image[0] && (
-          <div className="relative w-full h-64 mb-8 rounded-lg overflow-hidden">
-            <Image
+          <div className="mb-8 text-center">
+            <img
               src={recipe.image[0]}
               alt={recipe.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              unoptimized
+              className="max-w-full max-h-64 object-contain rounded-lg mx-auto"
+              style={{ maxWidth: '300px', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}
             />
           </div>
         )}
